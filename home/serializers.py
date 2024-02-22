@@ -2,7 +2,8 @@ from rest_framework import serializers
 from .models import VideoFile, Frame, GivenId
 
 
-
+class UploadZipSerializer(serializers.Serializer):
+    file = serializers.FileField()
 
 class GivenIdSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,5 +33,5 @@ class VideoFileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = VideoFile
-        fields = ['video_file', 'frames']
+        fields = "__all__"
 

@@ -1,12 +1,11 @@
-from django.http import HttpResponse
-from django.conf import settings
 from rest_framework.views import APIView
-from rest_framework.generics import ListCreateAPIView , RetrieveAPIView , UpdateAPIView ,DestroyAPIView
+from rest_framework.generics import ListCreateAPIView , RetrieveAPIView , RetrieveUpdateAPIView , UpdateAPIView ,DestroyAPIView
 from rest_framework.response import Response
 import os
+from rest_framework import status
 from .models import VideoFile , GivenId,Frame
-from .serializers import VideoFileSerializer, GivenIdSerializer,FrameSerializer ,GetFrameByIdSerializer
-
+from .serializers import VideoFileSerializer, GivenIdSerializer,FrameSerializer ,GetFrameByIdSerializer , UploadZipSerializer
+from .upload_file import handle_upload
 
 class DeleteGivenIdAPIView(UpdateAPIView):
     queryset=Frame.objects.all()
@@ -26,26 +25,18 @@ class VideoFileListView(APIView):
         serializer = VideoFileSerializer(video_files, many=True)
         return Response(serializer.data)
     
-class SetId(APIView):
-    def post(self, request):
-        data = request.data
-        print(data)
-        frame = Frame.objects.get(id=data["id"])
-        given_id = GivenId.objects.get(id=data["givenId"])
-        frame.given_id = given_id  # Assign the given_id object to the frame's given_id attribute
-        frame.save()  # Save the changes to the database
-        print(frame.given_id.id_name)
-        return Response("submitted")
-            
+
     
 class GivenIdsView(ListCreateAPIView):
     serializer_class=GivenIdSerializer
     queryset=GivenId.objects.all()
     
-class GetFramesByIdView(RetrieveAPIView):
+class GetFramesByIdView(RetrieveUpdateAPIView):
     serializer_class = GetFrameByIdSerializer
     queryset = GivenId.objects.all()
     lookup_field="pk"
+    
+ 
 
 class DeleteGivenId(DestroyAPIView):
     serializer_class=GivenIdSerializer
@@ -53,30 +44,41 @@ class DeleteGivenId(DestroyAPIView):
     lookup_field="pk"
         
 
-class RetrieveFrameView(RetrieveAPIView):
+class RetrieveFrameView(RetrieveUpdateAPIView):
     queryset = Frame.objects.all()
-    serializer_class=FrameSerializer  
-    lookup_field = 'pk'      
+    serializer_class = FrameSerializer
+    lookup_field = 'pk'
+    
+    def update(self, request, *args, **kwargs):
+        data = request.data
+        instance = self.get_object()
         
-       
-class FileDownloadView(APIView):
-    def get(self, request, filename):
-        # Define the path to the file within the media directory
-        file_path = os.path.join(settings.MEDIA_URL, filename)
+        given_id_id = data.get("givenId")
+        
+        if given_id_id is None:
+            return Response("givenId is required", status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            given_id = GivenId.objects.get(id=given_id_id)
+        except GivenId.DoesNotExist:
+            return Response("GivenId does not exist", status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if the file exists
-        if os.path.exists(file_path):
-            # Open the file in binary mode for reading
-            with open(file_path, 'rb') as file:
-                # Create an HttpResponse object with the file content
-                response = HttpResponse(file.read(), content_type='application/octet-stream')
-                # Set the Content-Disposition header to force download
-                response['Content-Disposition'] = f'attachment; filename="{filename}"'
-                return response
-        else:
-            # Return a 404 Not Found response if the file does not exist
-            return Response({'error': 'File not found.'}, status=404)
+        instance.given_id = given_id
+        instance.save()
 
+        # Optionally, return the updated data in the response
+        response = super().update(request, *args, **kwargs)
+        return response
+ 
+        
+class UploadFile(APIView):
+    def post(self , request):
+        serializer = UploadZipSerializer(data=request.data)
+        if serializer.is_valid():
+            uploaded_file = serializer.validated_data['file']
+            handle_upload(uploaded_file)
+            
+            return Response({'status': 'Zip file uploaded and extracted successfully'}, status=status.HTTP_201_CREATED)
 from django.shortcuts import render
 
 def index(request):
