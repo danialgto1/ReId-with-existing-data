@@ -19,7 +19,7 @@ def delete_directory(sender, instance, **kwargs):
     if os.path.exists(directory_path):
         shutil.rmtree(directory_path)
 class GivenId(models.Model):
-    id_name = models.CharField(max_length = 50)
+    id_name = models.CharField(max_length = 50 , unique=True)
     name= models.CharField(max_length = 50 , blank=True , null=True)
     location= models.CharField(max_length = 500 , blank=True , null=True)
 

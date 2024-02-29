@@ -42,9 +42,11 @@ class CreateNewId(ListCreateAPIView):
     
 class GivenIdsView(ListCreateAPIView):
     serializer_class = SortedGivenIdSerializer
-    queryset= [GivenId.objects.first()]
+    queryset= GivenId.objects.all()
 
-    
+class GetAllIds(APIView):
+    def get(self, request):
+        return Response(ReturnIds())
     
 class GetFramesByIdView(RetrieveUpdateAPIView):
     serializer_class = GetFrameByIdSerializer
@@ -158,7 +160,11 @@ class UploadVideo(APIView):
                 return Response (str(e) , status=HTTP_400_BAD_REQUEST)
         return Response("False")
 
-            
-            
+class GetDirectoryByFrameId(RetrieveAPIView):
+    serializer_class = GetDirectoryByIdSerializer
+    queryset = Frame.objects.all()
+    lookup_field = "pk"
+
+         
 def index(request):
     return render(request, 'index.html')

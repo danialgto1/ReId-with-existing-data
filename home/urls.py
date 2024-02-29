@@ -18,6 +18,9 @@ urlpatterns = [
         path("get_videos/", GetVideos.as_view()),
         path("retrieve_video/<str:video_file>",RetrieveVideoFile.as_view()),
         path("upload_video/" , UploadVideo.as_view()),
+        path("get_directory/<int:pk>", GetDirectoryByFrameId.as_view(), name=""),
+        path("get_all_ids/", GetAllIds.as_view(), name=""),
         path('' , index ),
+        
 
 ]   
