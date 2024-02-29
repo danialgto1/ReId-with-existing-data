@@ -38,7 +38,7 @@ class RetrieveVideoFile(RetrieveAPIView):
     
 class CreateNewId(ListCreateAPIView):
     serializer_class= GivenIdSerializer
-    queryset = GivenId.objects.all
+    queryset = GivenId.objects.all()
     
 class GivenIdsView(ListCreateAPIView):
     serializer_class = SortedGivenIdSerializer
