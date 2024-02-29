@@ -20,6 +20,8 @@ def delete_directory(sender, instance, **kwargs):
         shutil.rmtree(directory_path)
 class GivenId(models.Model):
     id_name = models.CharField(max_length = 50)
+    name= models.CharField(max_length = 50 , blank=True , null=True)
+    location= models.CharField(max_length = 500 , blank=True , null=True)
 
 
 
@@ -32,5 +34,6 @@ class Frame(models.Model):
     original_image = models.CharField(max_length=100)
     given_id =models.ForeignKey(GivenId, on_delete=models.SET_NULL, related_name='frames', null=True , blank=True)
     comment=models.TextField(blank=True , null=True)
+    status=models.IntegerField(default=0)
 
 

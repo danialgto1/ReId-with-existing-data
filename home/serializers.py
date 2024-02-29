@@ -6,10 +6,42 @@ class UploadZipSerializer(serializers.Serializer):
     file = serializers.FileField()
 
 class GivenIdSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = GivenId
         fields="__all__"
+
+
+
+class SortedGivenIdSerializer(serializers.ModelSerializer):
+    ids = serializers.SerializerMethodField()
+
+    class Meta:
+        model = GivenId
+        fields = ["ids"]
+
+    def get_ids(self, obj):
+        all_given_ids = GivenId.objects.all()
+        unique_ids_video_files = all_given_ids.values_list("frames__video_file__video_file", flat=True).distinct()
+        result = {}
+        for unique_id in unique_ids_video_files:
+            ids = GivenId.objects.filter(frames__video_file__video_file=unique_id).distinct()
+            srz_data = GivenIdSerializer(ids, many=True).data
+            result[unique_id] = srz_data
+        result["all"] = GivenIdSerializer(GivenId.objects.all(), many=True).data
+        return result
         
+class UniqueOriginalImagesSerializer(serializers.ModelSerializer):
+    original_images = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Frame
+        fields = ['original_images']
+
+    def get_original_images(self, obj):
+        frames = Frame.objects.all()
+        unique_images = frames.values_list('original_image', flat=True)
+        return unique_images    
 class FrameSerializer(serializers.ModelSerializer):
     given_id=serializers.SerializerMethodField()
     
@@ -26,7 +58,7 @@ class GetFrameByIdSerializer(serializers.ModelSerializer):
     frames= FrameSerializer(many=True , read_only=True)
     class Meta:
         model=GivenId
-        fields = ["id_name" , "frames"]
+        fields = "__all__"
 
 class VideoFileSerializer(serializers.ModelSerializer):
     frames = FrameSerializer(many=True, read_only=True)
@@ -35,3 +67,8 @@ class VideoFileSerializer(serializers.ModelSerializer):
         model = VideoFile
         fields = "__all__"
 
+
+class GetAllVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VideoFile
+        fields = "__all__"
