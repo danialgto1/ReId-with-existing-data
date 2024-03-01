@@ -3,3 +3,5 @@ Dog_ours.pt
 */migrations/
 home/migrations/
 db.sqlite3
+__pycache__/
+*/__pycache__/
