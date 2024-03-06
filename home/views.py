@@ -121,16 +121,15 @@ class RetrieveFrameView(RetrieveUpdateAPIView):
         
         given_id_id = data.get("id_name")
         
-        if given_id_id is None:
-            return Response("givenId is required", status=status.HTTP_400_BAD_REQUEST)
+        if given_id_id is not None:
         
-        try:
-            given_id = GivenId.objects.get(id_name=given_id_id)
-        except GivenId.DoesNotExist:
-            return Response("GivenId does not exist", status=status.HTTP_400_BAD_REQUEST)
+            try:
+                given_id = GivenId.objects.get(id_name=given_id_id)
+            except GivenId.DoesNotExist:
+                return Response("GivenId does not exist", status=status.HTTP_400_BAD_REQUEST)
 
-        instance.given_id = given_id
-        instance.save()
+            instance.given_id = given_id
+            instance.save()
 
         # Optionally, return the updated data in the response
         response = super().update(request, *args, **kwargs)
