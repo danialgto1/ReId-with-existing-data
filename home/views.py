@@ -153,7 +153,7 @@ class UploadVideo(APIView):
         if serializer.is_valid():
             uploaded_file = serializer.validated_data['file']
             try:
-                run (uploaded_file,frame_limit=30,frame_gap=100)
+                run (uploaded_file)
                 return Response({'status': 'Video file uploaded and extracted successfully'}, status=status.HTTP_201_CREATED)
             except Exception as e:
                 return Response (str(e) , status=HTTP_400_BAD_REQUEST)

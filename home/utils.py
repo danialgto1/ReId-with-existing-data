@@ -50,7 +50,7 @@ def convert_video(input_file, output_file, codec='h264', bitrate='1024k'):
 
 
 
-def run(video_file,frame_limit=np.inf,frame_gap=0):
+def run(video_file,frame_limit=np.inf,frame_gap=1):
   
   vid_path=f"{video_file.name[:-4]}"
   directory = os.path.join("Files" , vid_path)
