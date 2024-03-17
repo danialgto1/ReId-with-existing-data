@@ -157,7 +157,7 @@ class UploadVideo(APIView):
                 return Response({'status': 'Video file uploaded and extracted successfully'}, status=status.HTTP_201_CREATED)
             except Exception as e:
                 return Response (str(e) , status=HTTP_400_BAD_REQUEST)
-        return Response("False")
+        return Response("the serializers is not valid" , status=HTTP_400_BAD_REQUEST)
 
 class GetDirectoryByFrameId(RetrieveAPIView):
     serializer_class = GetDirectoryByIdSerializer
